@@ -1,5 +1,4 @@
-# 🥬🍎🌾 Food Image Asset Library
-
+# 🥬🍎🌾 Freshcart Assets Hub
 > **Master documentation and asset-tracking hub** for the local-commerce image library.
 
 This repository is organized into three independent catalogs:
