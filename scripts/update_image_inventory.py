@@ -1,26 +1,20 @@
 #!/usr/bin/env python3
-"""Generate a dynamic food-image inventory dashboard.
+"""Generate a fully dynamic food-image inventory dashboard.
 
-Folders are the source of truth for category placement:
+Category is determined only by the top-level folder:
   Vegetables/ -> vegetables
   Fruits/     -> fruits
   Grains/     -> grains
 
 Filename grammar:
-  <item>_<specification>_<count>
-  <item>_<count>
+  <item_name>_<type/specification>_<count_number>
+  <item_name>_<count_number>
 
-Examples:
-  grapes_red_1.jpg
-  grapes_red_2.jpg
-  grapes_green_1.jpg
-
-The dashboard creates a dynamic parent item and nested specification rows.
-No fixed product catalog is required for discovering new names.
+The folder contents are the source of truth. There is deliberately no fixed
+catalog-size target: adding an image can discover a new item or specification.
 """
 from __future__ import annotations
 
-import csv
 import re
 from collections import defaultdict
 from pathlib import Path
@@ -28,7 +22,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".avif"}
-CATALOG_TARGETS = {"Vegetables": 254}
 
 ALIASES = {
     "eggplant": "brinjal", "aubergine": "brinjal", "jalepeno": "jalapeno",
@@ -61,22 +54,10 @@ def normalize_name(value: str) -> str:
 
 
 def parse_filename(stem: str):
-    """Return (parent, specification, count) from the requested grammar.
-
-    The final numeric token is always the image sequence number. Everything
-    before it is split into parent/specification. If there are >=2 tokens,
-    the first token is the parent and the remaining tokens are specification.
-    This intentionally keeps the grammar simple and predictable.
-    """
     s = clean_token(stem)
     match = re.match(r"^(?P<body>.+?)(?:_(?P<count>\d+))$", s)
-    if match:
-        body = match.group("body")
-        count = int(match.group("count"))
-    else:
-        body = s
-        count = None
-
+    body = match.group("body") if match else s
+    count = int(match.group("count")) if match else None
     parts = body.split("_") if body else []
     if len(parts) >= 2:
         parent = normalize_name(parts[0])
@@ -91,26 +72,12 @@ def scan_folder(folder: Path):
     files = [p for p in folder.rglob("*") if p.is_file() and p.suffix.lower() in IMAGE_EXTENSIONS]
     products = defaultdict(lambda: {"base": [], "specs": defaultdict(list)})
     for path in files:
-        parent, spec, count = parse_filename(path.stem)
-        if not parent:
-            continue
+        parent, spec, _ = parse_filename(path.stem)
         if spec:
             products[parent]["specs"][spec].append(path)
-        else:
+        elif parent:
             products[parent]["base"].append(path)
     return files, products
-
-
-def load_catalog_counts():
-    result = dict(CATALOG_TARGETS)
-    for category in ("Vegetables", "Fruits", "Grains"):
-        csv_path = ROOT / "data" / f"{category.lower()}.csv"
-        if csv_path.exists():
-            with csv_path.open("r", encoding="utf-8-sig", newline="") as f:
-                rows = list(csv.DictReader(f))
-            if rows:
-                result[category] = len(rows)
-    return result
 
 
 def pct(a: int, b: int) -> float:
@@ -134,75 +101,76 @@ def status(photo_count: int) -> str:
     return "🟨 Covered"
 
 
-def category_block(category: str, files, products, target: int | None):
+def category_block(category: str, files, products):
     photos = len(files)
-    covered = len(products)
-    denominator = target or covered
-    coverage = pct(covered, denominator)
-    zero = max(denominator - covered, 0) if target else 0
-    emoji = "🥬" if category == "Vegetables" else "🍎" if category == "Fruits" else "🌾"
-
-    # Every discovered parent is a valid dynamic item. Specifications are
-    # nested under their parent so names such as grapes_red and grapes_green
-    # do not become unrelated top-level products.
-    rows = []
-    for parent in sorted(products):
-        data = products[parent]
-        total = item_total(data)
-        rows.append((parent, total, data))
+    unique_items = len(products)
+    unique_specs = sum(len(data["specs"]) for data in products.values())
+    coverage = 100.0 if unique_items else 0.0
+    emoji = {"Vegetables": "🥬", "Fruits": "🍎", "Grains": "🌾"}[category]
 
     table = [
         f"## {emoji} {category}", "",
-        f"**{covered} detected items** · **{photos} photos** · **{coverage:.1f}% coverage**", "",
-        f"`{progress(coverage)}` **{covered}/{denominator}**", "",
+        f"**{unique_items} unique items** · **{unique_specs} unique specifications** · **{photos} photos**", "",
+        f"`{progress(coverage)}` **{unique_items} items discovered**", "",
         "<details>",
-        f"<summary>📋 View all {category.lower()} image statuses ({covered} items)</summary>",
+        f"<summary>📋 View all {category.lower()} image statuses ({unique_items} items)</summary>",
         "",
-        "| Item | Photos | Status |", "|---|---:|---|",
+        "| Item | Photos | Specifications | Status |", "|---|---:|---:|---|",
     ]
 
-    for parent, total, data in rows:
-        table.append(f"| **{display_name(parent)}** | **{total}** | **{status(total)}** |")
+    for parent in sorted(products):
+        data = products[parent]
+        total = item_total(data)
+        spec_count = len(data["specs"])
+        table.append(f"| **{display_name(parent)}** | **{total}** | **{spec_count}** | **{status(total)}** |")
         if data["specs"]:
-            table.extend(["", "<details>", f"<summary>↳ View {display_name(parent)} specifications</summary>", "", "| Specification | Photos | Status |", "|---|---:|---|"])
+            table.extend(["", "<details>", f"<summary>↳ {display_name(parent)} — specifications</summary>", "", "| Subtype / Specification | Photos | Status |", "|---|---:|---|"])
             for spec in sorted(data["specs"]):
                 n = len(data["specs"][spec])
-                table.append(f"| ↳ {display_name(parent)}_{display_name(spec).lower().replace(' ', '_')} | {n} | {status(n)} |")
+                table.append(f"| `{parent.replace(' ', '_')}_{spec.replace(' ', '_')}` | {n} | {status(n)} |")
             table.extend(["", "</details>", ""])
 
-    table.extend(["", "</details>"])
-    if zero:
-        table.extend(["", f"> ⚪ **{zero} catalog target items still need at least one image.**"])
-    table.extend(["", "---", ""])
-    return "\n".join(table), covered, photos, denominator
+    table.extend(["", "</details>", "", "---", ""])
+    return "\n".join(table), unique_items, unique_specs, photos
 
 
 def main():
-    targets = load_catalog_counts()
     blocks = []
-    total_photos = total_covered = total_catalog = 0
+    total_photos = total_items = total_specs = 0
     summary = []
 
     for category in ("Vegetables", "Fruits", "Grains"):
         folder = ROOT / category
         files, products = scan_folder(folder) if folder.exists() else ([], {})
-        block, covered, photos, denominator = category_block(category, files, products, targets.get(category))
+        block, items, specs, photos = category_block(category, files, products)
         blocks.append(block)
         total_photos += photos
-        total_covered += covered
-        total_catalog += denominator
-        summary.append((category, covered, photos, denominator))
+        total_items += items
+        total_specs += specs
+        summary.append((category, items, specs, photos))
 
-    master_coverage = pct(total_covered, total_catalog)
     summary_table = [
-        "## 📊 Live Master Dashboard", "", "| Catalog | Items detected | Catalog target | Photos | Coverage |",
-        "|---|---:|---:|---:|---:|",
+        "## 📊 Live Master Dashboard", "",
+        "| Category | Unique items | Unique specifications | Total photos |", "|---|---:|---:|---:|",
     ]
-    for category, covered, photos, denominator in summary:
-        summary_table.append(f"| {category} | {covered} | {denominator} | {photos} | {pct(covered, denominator):.1f}% |")
+    for category, items, specs, photos in summary:
+        summary_table.append(f"| {category} | **{items}** | **{specs}** | **{photos}** |")
     summary_table += [
-        "", f"**Total photos:** {total_photos}  ·  **Detected items:** {total_covered}  ·  **Overall coverage:** {master_coverage:.1f}%",
-        "", f"`{progress(master_coverage)}` **{master_coverage:.1f}%**", "",
+        "",
+        f"**Master totals:** {total_items} unique items · {total_specs} unique specifications · {total_photos} photos",
+        "",
+        "> 🔄 **100% dynamic:** these numbers come directly from the current image folders. There is no fixed catalog target.",
+        "",
+        "### 🧩 Dynamic Structure", "",
+        "| Level | What is counted |", "|---|---|",
+        "| 🥬/🍎/🌾 Category | Top-level folder |",
+        "| 🧺 Unique item | Parent name discovered from filenames |",
+        "| 🏷️ Unique specification | Distinct `<type/specification>` under an item |",
+        "| 📸 Photo | Every image file |",
+        "| 📈 Item status | Based on total photos for that item |",
+        "",
+        "> Example: `grapes_red_1.jpg`, `grapes_red_2.jpg`, `grapes_green_1.jpg` → **Grapes: 3 photos, 2 unique specifications** → `grapes_red: 2`, `grapes_green: 1`.",
+        "",
         "> 🤖 This section is generated by `scripts/update_image_inventory.py`. Do not edit it manually.", "",
     ]
 
@@ -220,7 +188,7 @@ def main():
     else:
         content = original.rstrip() + "\n\n" + generated + "\n"
     README.write_text(content, encoding="utf-8")
-    print(f"Generated inventory: {total_photos} photos, {total_covered} dynamic items, {master_coverage:.1f}% coverage")
+    print(f"Generated dynamic inventory: {total_items} items, {total_specs} specifications, {total_photos} photos")
 
 
 if __name__ == "__main__":
