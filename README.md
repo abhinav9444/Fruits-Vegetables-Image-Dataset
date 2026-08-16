@@ -32,6 +32,9 @@ The system is designed for an e-commerce application where a single catalog item
 
 `█████████████░░░░░░░` **163/254**
 
+<details>
+<summary>📋 View all vegetables product image statuses (163 entries)</summary>
+
 | Product | Photos | Status |
 |---|---:|---|
 | Sweet Corn | 8 | 🟦 Rich |
@@ -198,6 +201,8 @@ The system is designed for an e-commerce application where a single catalog item
 | Tomato2801 | 1 | 🟨 Covered |
 | Tomato2905 | 1 | 🟨 Covered |
 
+</details>
+
 > ⚪ **91 catalog items still need at least one image.**
 
 ---
@@ -207,6 +212,9 @@ The system is designed for an e-commerce application where a single catalog item
 **32 detected product groups** · **54 photos** · **100.0% coverage**
 
 `████████████████████` **32/32**
+
+<details>
+<summary>📋 View all fruits product image statuses (32 entries)</summary>
 
 | Product | Photos | Status |
 |---|---:|---|
@@ -243,6 +251,8 @@ The system is designed for an e-commerce application where a single catalog item
 | Wood Apple | 1 | 🟨 Covered |
 | Wood Apple2 | 1 | 🟨 Covered |
 
+</details>
+
 ---
 
 ## 🌾 Grains
@@ -251,11 +261,16 @@ The system is designed for an e-commerce application where a single catalog item
 
 `████████████████████` **3/3**
 
+<details>
+<summary>📋 View all grains product image statuses (3 entries)</summary>
+
 | Product | Photos | Status |
 |---|---:|---|
 | Soy Beans | 6 | 🟦 Rich |
 | Chana Dal | 1 | 🟨 Covered |
 | Soy Bean | 1 | 🟨 Covered |
+
+</details>
 
 ---
 <!-- AUTO-INVENTORY:END -->
