@@ -1,0 +1,45 @@
+name: Update image inventory
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Vegetables/**'
+      - 'Fruits/**'
+      - 'Grains/**'
+      - 'data/**'
+      - 'scripts/update_image_inventory.py'
+      - 'README.md'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Generate inventory dashboard
+        run: python scripts/update_image_inventory.py
+
+      - name: Commit generated README when changed
+        run: |
+          if git diff --quiet -- README.md; then
+            echo 'No README changes.'
+            exit 0
+          fi
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add README.md
+          git commit -m 'docs: update image inventory'
+          git push
