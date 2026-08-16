@@ -1,11 +1,22 @@
 #!/usr/bin/env python3
-"""Generate the food-image inventory dashboard from the existing repo layout.
+"""Generate a dynamic food-image inventory dashboard.
 
-The repository intentionally keeps its existing top-level folders:
-  Vegetables/, Fruits/, Grains/
+Folders are the source of truth for category placement:
+  Vegetables/ -> vegetables
+  Fruits/     -> fruits
+  Grains/     -> grains
 
-The script groups files such as potato1.jpg, potato_2.jpg and potato-03.jpg
-under one product and writes a generated dashboard to README.md.
+Filename grammar:
+  <item>_<specification>_<count>
+  <item>_<count>
+
+Examples:
+  grapes_red_1.jpg
+  grapes_red_2.jpg
+  grapes_green_1.jpg
+
+The dashboard creates a dynamic parent item and nested specification rows.
+No fixed product catalog is required for discovering new names.
 """
 from __future__ import annotations
 
@@ -17,13 +28,12 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 README = ROOT / "README.md"
 IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp", ".avif"}
-
 CATALOG_TARGETS = {"Vegetables": 254}
 
 ALIASES = {
     "eggplant": "brinjal", "aubergine": "brinjal", "jalepeno": "jalapeno",
-    "green_bell_pepper": "green capsicum", "bell_pepper": "capsicum",
-    "lady_finger": "okra", "ladyfinger": "okra", "bhindi": "okra",
+    "green bell pepper": "green capsicum", "bell pepper": "capsicum",
+    "lady finger": "okra", "ladyfinger": "okra", "bhindi": "okra",
     "drumstick": "moringa drumstick", "moringa": "moringa drumstick",
     "arbi": "colocasia arbi", "taro": "colocasia arbi",
     "suran": "elephant foot yam", "jimikand": "elephant foot yam",
@@ -35,23 +45,59 @@ ALIASES = {
 }
 
 
-def normalize(value: str) -> str:
-    value = value.lower().replace("&", " and ")
-    value = re.sub(r"\.(jpg|jpeg|png|webp|gif|bmp|avif)$", "", value, flags=re.I)
-    value = re.sub(r"[\-_]+", " ", value)
-    value = re.sub(r"(?:\s+|^)(?:image|img|photo|pic)?\s*\d{1,6}$", "", value)
-    value = re.sub(r"\s+(?:copy|final|edited|new|original|small|large)$", "", value)
-    value = re.sub(r"\s+", " ", value).strip()
+def clean_token(value: str) -> str:
+    value = value.lower().strip()
+    value = re.sub(r"[^a-z0-9]+", "_", value).strip("_")
+    return value
+
+
+def display_name(value: str) -> str:
+    return value.replace("_", " ").strip().title()
+
+
+def normalize_name(value: str) -> str:
+    value = clean_token(value).replace("_", " ")
     return ALIASES.get(value, value)
+
+
+def parse_filename(stem: str):
+    """Return (parent, specification, count) from the requested grammar.
+
+    The final numeric token is always the image sequence number. Everything
+    before it is split into parent/specification. If there are >=2 tokens,
+    the first token is the parent and the remaining tokens are specification.
+    This intentionally keeps the grammar simple and predictable.
+    """
+    s = clean_token(stem)
+    match = re.match(r"^(?P<body>.+?)(?:_(?P<count>\d+))$", s)
+    if match:
+        body = match.group("body")
+        count = int(match.group("count"))
+    else:
+        body = s
+        count = None
+
+    parts = body.split("_") if body else []
+    if len(parts) >= 2:
+        parent = normalize_name(parts[0])
+        spec = normalize_name("_".join(parts[1:]))
+    else:
+        parent = normalize_name(body)
+        spec = ""
+    return parent, spec, count
 
 
 def scan_folder(folder: Path):
     files = [p for p in folder.rglob("*") if p.is_file() and p.suffix.lower() in IMAGE_EXTENSIONS]
-    products: dict[str, list[str]] = defaultdict(list)
+    products = defaultdict(lambda: {"base": [], "specs": defaultdict(list)})
     for path in files:
-        key = normalize(path.stem)
-        if key:
-            products[key].append(path.relative_to(ROOT).as_posix())
+        parent, spec, count = parse_filename(path.stem)
+        if not parent:
+            continue
+        if spec:
+            products[parent]["specs"][spec].append(path)
+        else:
+            products[parent]["base"].append(path)
     return files, products
 
 
@@ -68,12 +114,24 @@ def load_catalog_counts():
 
 
 def pct(a: int, b: int) -> float:
-    return (a / b * 100) if b else 0.0
+    return a / b * 100 if b else 0.0
 
 
 def progress(value: float, width: int = 20) -> str:
-    filled = round(width * value / 100)
+    filled = max(0, min(width, round(width * value / 100)))
     return "█" * filled + "░" * (width - filled)
+
+
+def item_total(data) -> int:
+    return len(data["base"]) + sum(len(v) for v in data["specs"].values())
+
+
+def status(photo_count: int) -> str:
+    if photo_count == 0:
+        return "⚪ Missing"
+    if photo_count >= 3:
+        return "🟦 Rich"
+    return "🟨 Covered"
 
 
 def category_block(category: str, files, products, target: int | None):
@@ -82,31 +140,39 @@ def category_block(category: str, files, products, target: int | None):
     denominator = target or covered
     coverage = pct(covered, denominator)
     zero = max(denominator - covered, 0) if target else 0
-    rows = sorted(products.items(), key=lambda x: (-len(x[1]), x[0]))
     emoji = "🥬" if category == "Vegetables" else "🍎" if category == "Fruits" else "🌾"
 
-    # GitHub README rendering does not reliably support CSS such as
-    # max-height/overflow-y. Use native <details> instead so each large
-    # category table stays contained and does not make the whole README long.
+    # Every discovered parent is a valid dynamic item. Specifications are
+    # nested under their parent so names such as grapes_red and grapes_green
+    # do not become unrelated top-level products.
+    rows = []
+    for parent in sorted(products):
+        data = products[parent]
+        total = item_total(data)
+        rows.append((parent, total, data))
+
     table = [
-        f"## {emoji} {category}",
-        "",
-        f"**{covered} detected product groups** · **{photos} photos** · **{coverage:.1f}% coverage**",
-        "",
-        f"`{progress(coverage)}` **{covered}/{denominator}**",
-        "",
+        f"## {emoji} {category}", "",
+        f"**{covered} detected items** · **{photos} photos** · **{coverage:.1f}% coverage**", "",
+        f"`{progress(coverage)}` **{covered}/{denominator}**", "",
         "<details>",
-        f"<summary>📋 View all {category.lower()} product image statuses ({covered} entries)</summary>",
+        f"<summary>📋 View all {category.lower()} image statuses ({covered} items)</summary>",
         "",
-        "| Product | Photos | Status |",
-        "|---|---:|---|",
+        "| Item | Photos | Status |", "|---|---:|---|",
     ]
-    for name, paths in rows:
-        status = "🟦 Rich" if len(paths) >= 3 else "🟨 Covered"
-        table.append(f"| {name.title()} | {len(paths)} | {status} |")
+
+    for parent, total, data in rows:
+        table.append(f"| **{display_name(parent)}** | **{total}** | **{status(total)}** |")
+        if data["specs"]:
+            table.extend(["", "<details>", f"<summary>↳ View {display_name(parent)} specifications</summary>", "", "| Specification | Photos | Status |", "|---|---:|---|"])
+            for spec in sorted(data["specs"]):
+                n = len(data["specs"][spec])
+                table.append(f"| ↳ {display_name(parent)}_{display_name(spec).lower().replace(' ', '_')} | {n} | {status(n)} |")
+            table.extend(["", "</details>", ""])
+
     table.extend(["", "</details>"])
     if zero:
-        table.extend(["", f"> ⚪ **{zero} catalog items still need at least one image.**"])
+        table.extend(["", f"> ⚪ **{zero} catalog target items still need at least one image.**"])
     table.extend(["", "---", ""])
     return "\n".join(table), covered, photos, denominator
 
@@ -135,7 +201,7 @@ def main():
     for category, covered, photos, denominator in summary:
         summary_table.append(f"| {category} | {covered} | {denominator} | {photos} | {pct(covered, denominator):.1f}% |")
     summary_table += [
-        "", f"**Total photos:** {total_photos}  ·  **Detected product groups:** {total_covered}  ·  **Overall coverage:** {master_coverage:.1f}%",
+        "", f"**Total photos:** {total_photos}  ·  **Detected items:** {total_covered}  ·  **Overall coverage:** {master_coverage:.1f}%",
         "", f"`{progress(master_coverage)}` **{master_coverage:.1f}%**", "",
         "> 🤖 This section is generated by `scripts/update_image_inventory.py`. Do not edit it manually.", "",
     ]
@@ -144,9 +210,6 @@ def main():
     marker_end = "<!-- AUTO-INVENTORY:END -->"
     generated = marker_start + "\n" + "\n".join(summary_table + blocks) + marker_end
     original = README.read_text(encoding="utf-8") if README.exists() else "# Food Image Asset Library\n"
-
-    # Remove any previous generated dashboard, then place the fresh dashboard
-    # immediately below the introductory repository description.
     if marker_start in original and marker_end in original:
         original = original.split(marker_start, 1)[0].rstrip() + original.split(marker_end, 1)[1]
 
@@ -156,9 +219,8 @@ def main():
         content = original.replace(intro + "\n\n---", insertion, 1)
     else:
         content = original.rstrip() + "\n\n" + generated + "\n"
-
     README.write_text(content, encoding="utf-8")
-    print(f"Generated inventory: {total_photos} photos, {total_covered} product groups, {master_coverage:.1f}% coverage")
+    print(f"Generated inventory: {total_photos} photos, {total_covered} dynamic items, {master_coverage:.1f}% coverage")
 
 
 if __name__ == "__main__":
