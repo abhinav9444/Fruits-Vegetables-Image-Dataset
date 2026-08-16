@@ -83,15 +83,28 @@ def category_block(category: str, files, products, target: int | None):
     coverage = pct(covered, denominator)
     zero = max(denominator - covered, 0) if target else 0
     rows = sorted(products.items(), key=lambda x: (-len(x[1]), x[0]))
+    emoji = "🥬" if category == "Vegetables" else "🍎" if category == "Fruits" else "🌾"
+
+    # GitHub README rendering does not reliably support CSS such as
+    # max-height/overflow-y. Use native <details> instead so each large
+    # category table stays contained and does not make the whole README long.
     table = [
-        f"## {'🥬' if category == 'Vegetables' else '🍎' if category == 'Fruits' else '🌾'} {category}",
-        "", f"**{covered} detected product groups** · **{photos} photos** · **{coverage:.1f}% coverage**", "",
-        f"`{progress(coverage)}` **{covered}/{denominator}**", "",
-        "| Product | Photos | Status |", "|---|---:|---|",
+        f"## {emoji} {category}",
+        "",
+        f"**{covered} detected product groups** · **{photos} photos** · **{coverage:.1f}% coverage**",
+        "",
+        f"`{progress(coverage)}` **{covered}/{denominator}**",
+        "",
+        "<details>",
+        f"<summary>📋 View all {category.lower()} product image statuses ({covered} entries)</summary>",
+        "",
+        "| Product | Photos | Status |",
+        "|---|---:|---|",
     ]
     for name, paths in rows:
         status = "🟦 Rich" if len(paths) >= 3 else "🟨 Covered"
         table.append(f"| {name.title()} | {len(paths)} | {status} |")
+    table.extend(["", "</details>"])
     if zero:
         table.extend(["", f"> ⚪ **{zero} catalog items still need at least one image.**"])
     table.extend(["", "---", ""])
