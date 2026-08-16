@@ -12,6 +12,132 @@ The system is designed for an e-commerce application where a single catalog item
 
 ---
 
+# 🥬 Vegetables
+
+The vegetable catalog currently contains **254 catalog entries**.
+
+### Documentation
+
+➡️ [Open Vegetable Image README](./vegetables/README.md)
+
+Recommended vegetable image folders:
+
+```text
+vegetables/assets/images/
+├── root/
+├── solanaceae/
+├── gourds/
+├── beans/
+├── corn/
+├── cruciferous/
+├── leafy/
+├── shoots-flowers/
+├── mushrooms/
+├── regional/
+├── aromatics/
+└── exotic/
+```
+
+---
+
+# 🍎 Fruits
+
+The fruit catalog should track:
+
+- common Indian fruits
+- regional fruits
+- seasonal fruits
+- tropical fruits
+- imported fruits
+- berries
+- citrus
+- stone fruits
+- melons
+- dried/fresh distinctions where relevant
+
+### Documentation
+
+➡️ [Open Fruit Image README](./fruits/README.md)
+
+Recommended folders:
+
+```text
+fruits/assets/images/
+├── tropical/
+├── citrus/
+├── berries/
+├── stone-fruits/
+├── melons/
+├── apples-pears/
+├── grapes/
+├── regional/
+├── exotic/
+└── seasonal/
+```
+
+---
+
+# 🌾 Grains, Cereals & Pulses
+
+The grains catalog should distinguish:
+
+- whole grains
+- cereals
+- millets
+- rice varieties
+- wheat varieties
+- maize/corn
+- pulses
+- dals
+- legumes
+- regional grains
+- specialty grains
+
+### Documentation
+
+➡️ [Open Grains Image README](./grains/README.md)
+
+Recommended folders:
+
+```text
+grains/assets/images/
+├── rice/
+├── wheat/
+├── millets/
+├── maize/
+├── cereals/
+├── pulses/
+├── dals/
+├── legumes/
+├── regional/
+└── specialty/
+```
+
+---
+
+# 🏷️ Status Model
+
+Each catalog item can eventually have:
+
+```text
+⚪ NOT STARTED
+🟨 IMAGE FOUND
+🟦 MULTIPLE IMAGES
+🟩 VERIFIED
+```
+
+Suggested detailed state:
+
+| Status | Condition |
+|---|---|
+| ⚪ Missing | 0 photos |
+| 🟨 Covered | ≥1 photo |
+| 🟦 Rich | ≥3 photos |
+| 🟩 Verified | Manually reviewed |
+| 🔴 Needs Review | Image exists but has a problem |
+
+---
+
 ## 📊 Master Dashboard
 
 | Metric | Meaning |
@@ -29,6 +155,34 @@ The system is designed for an e-commerce application where a single catalog item
 | 🧹 Quality review | Images passing visual/technical review |
 
 > **Important:** The dashboard should be generated automatically by the repository's inventory script. Do not manually maintain calculated numbers.
+
+---
+
+# 🚦 Definition of Done
+
+A product is considered **image-covered** when:
+
+```text
+≥ 1 correctly mapped image
+```
+
+A product is considered **richly covered** when:
+
+```text
+≥ 3 useful images
+```
+
+A product is considered **verified** when:
+
+```text
+Correct product
+        +
+Good quality
+        +
+License/source checked
+        +
+Correct catalog mapping
+```
 
 ---
 
@@ -155,109 +309,6 @@ food-image-library/
 
 ---
 
-# 🥬 Vegetables
-
-The vegetable catalog currently contains **254 catalog entries**.
-
-### Documentation
-
-➡️ [Open Vegetable Image README](./vegetables/README.md)
-
-Recommended vegetable image folders:
-
-```text
-vegetables/assets/images/
-├── root/
-├── solanaceae/
-├── gourds/
-├── beans/
-├── corn/
-├── cruciferous/
-├── leafy/
-├── shoots-flowers/
-├── mushrooms/
-├── regional/
-├── aromatics/
-└── exotic/
-```
-
----
-
-# 🍎 Fruits
-
-The fruit catalog should track:
-
-- common Indian fruits
-- regional fruits
-- seasonal fruits
-- tropical fruits
-- imported fruits
-- berries
-- citrus
-- stone fruits
-- melons
-- dried/fresh distinctions where relevant
-
-### Documentation
-
-➡️ [Open Fruit Image README](./fruits/README.md)
-
-Recommended folders:
-
-```text
-fruits/assets/images/
-├── tropical/
-├── citrus/
-├── berries/
-├── stone-fruits/
-├── melons/
-├── apples-pears/
-├── grapes/
-├── regional/
-├── exotic/
-└── seasonal/
-```
-
----
-
-# 🌾 Grains, Cereals & Pulses
-
-The grains catalog should distinguish:
-
-- whole grains
-- cereals
-- millets
-- rice varieties
-- wheat varieties
-- maize/corn
-- pulses
-- dals
-- legumes
-- regional grains
-- specialty grains
-
-### Documentation
-
-➡️ [Open Grains Image README](./grains/README.md)
-
-Recommended folders:
-
-```text
-grains/assets/images/
-├── rice/
-├── wheat/
-├── millets/
-├── maize/
-├── cereals/
-├── pulses/
-├── dals/
-├── legumes/
-├── regional/
-└── specialty/
-```
-
----
-
 # 📸 Multiple Images Per Product
 
 Multiple images are encouraged.
@@ -295,29 +346,6 @@ They can represent:
 
 ---
 
-# 🏷️ Status Model
-
-Each catalog item can eventually have:
-
-```text
-⚪ NOT STARTED
-🟨 IMAGE FOUND
-🟦 MULTIPLE IMAGES
-🟩 VERIFIED
-```
-
-Suggested detailed state:
-
-| Status | Condition |
-|---|---|
-| ⚪ Missing | 0 photos |
-| 🟨 Covered | ≥1 photo |
-| 🟦 Rich | ≥3 photos |
-| 🟩 Verified | Manually reviewed |
-| 🔴 Needs Review | Image exists but has a problem |
-
----
-
 # 🔐 Licensing & Source Tracking
 
 For a commercial application, image licensing should be tracked separately from image availability.
@@ -338,6 +366,26 @@ Recommended metadata:
 | Verified | Yes |
 
 **Never assume that an image found online is commercially reusable.**
+
+---
+
+# 🧭 Long-Term Goal
+
+Build a reusable, commercially suitable food-image dataset for the local-commerce application covering:
+
+```text
+🥬 Vegetables
+🍎 Fruits
+🌾 Grains
+🫘 Pulses & legumes
+🌿 Herbs
+🥜 Nuts & seeds
+🧂 Spices
+🥛 Dairy
+🧃 Packaged foods
+```
+
+The current documentation focuses on **vegetables, fruits and grains** and can be extended using the same tracking model.
 
 ---
 
@@ -363,54 +411,6 @@ GitHub Actions can run this whenever images or catalog files change.
 
 ---
 
-# 🚦 Definition of Done
-
-A product is considered **image-covered** when:
-
-```text
-≥ 1 correctly mapped image
-```
-
-A product is considered **richly covered** when:
-
-```text
-≥ 3 useful images
-```
-
-A product is considered **verified** when:
-
-```text
-Correct product
-        +
-Good quality
-        +
-License/source checked
-        +
-Correct catalog mapping
-```
-
----
-
-# 🧭 Long-Term Goal
-
-Build a reusable, commercially suitable food-image dataset for the local-commerce application covering:
-
-```text
-🥬 Vegetables
-🍎 Fruits
-🌾 Grains
-🫘 Pulses & legumes
-🌿 Herbs
-🥜 Nuts & seeds
-🧂 Spices
-🥛 Dairy
-🧃 Packaged foods
-```
-
-The current documentation focuses on **vegetables, fruits and grains** and can be extended using the same tracking model.
-
----
-
 ## 📌 Maintenance Rule
 
 **Catalog data is the source of truth.**
@@ -420,260 +420,3 @@ The current documentation focuses on **vegetables, fruits and grains** and can b
 **Generated dashboards are derived data.**
 
 Do not manually edit calculated metrics when automation is available.
-
-<!-- AUTO-INVENTORY:START -->
-## 📊 Live Master Dashboard
-
-| Catalog | Items detected | Catalog target | Photos | Coverage |
-|---|---:|---:|---:|---:|
-| Vegetables | 163 | 254 | 211 | 64.2% |
-| Fruits | 40 | 40 | 54 | 100.0% |
-| Grains | 3 | 3 | 8 | 100.0% |
-
-**Total photos:** 273  ·  **Detected product groups:** 206  ·  **Overall coverage:** 69.4%
-
-`██████████████░░░░░░` **69.4%**
-
-> 🤖 This section is generated by `scripts/update_image_inventory.py`. Do not edit it manually.
-
-## 🥬 Vegetables
-
-**163 detected product groups** · **211 photos** · **64.2% coverage**
-
-`█████████████░░░░░░░` **163/254**
-
-| Product | Photos | Status |
-|---|---:|---|
-| Sweet Corn | 8 | 🟦 Rich |
-| Spinach | 7 | 🟦 Rich |
-| Turnip | 6 | 🟦 Rich |
-| Lettuce | 5 | 🟦 Rich |
-| Cauliflower | 4 | 🟦 Rich |
-| White Raddish | 4 | 🟦 Rich |
-| Bell Pepper Mixed | 3 | 🟦 Rich |
-| Brinjal | 3 | 🟦 Rich |
-| Garlic | 3 | 🟦 Rich |
-| Ginger | 3 | 🟦 Rich |
-| Peas | 3 | 🟦 Rich |
-| Capsicum Green | 2 | 🟨 Covered |
-| Capsicum Mixed | 2 | 🟨 Covered |
-| Chilli Mixed | 2 | 🟨 Covered |
-| Chilli Red | 2 | 🟨 Covered |
-| Corn | 2 | 🟨 Covered |
-| Jalapeno | 2 | 🟨 Covered |
-| Lettuce Cut | 2 | 🟨 Covered |
-| Peas Packed | 2 | 🟨 Covered |
-| Asparagus1031 | 1 | 🟨 Covered |
-| Asparagus248 | 1 | 🟨 Covered |
-| Asparagus2729 | 1 | 🟨 Covered |
-| Asparagus273 | 1 | 🟨 Covered |
-| Asparagus2870 | 1 | 🟨 Covered |
-| Asparagus2988 | 1 | 🟨 Covered |
-| Asparagus3008 | 1 | 🟨 Covered |
-| Asparagus3193 | 1 | 🟨 Covered |
-| Asparagus3708 | 1 | 🟨 Covered |
-| Asparagus3938 | 1 | 🟨 Covered |
-| Asparagus4024 | 1 | 🟨 Covered |
-| Asparagus4071 | 1 | 🟨 Covered |
-| Asparagus4270 | 1 | 🟨 Covered |
-| Asparagus4315 | 1 | 🟨 Covered |
-| Broccoli1072 | 1 | 🟨 Covered |
-| Broccoli141 | 1 | 🟨 Covered |
-| Broccoli186 | 1 | 🟨 Covered |
-| Broccoli2315 | 1 | 🟨 Covered |
-| Broccoli2568 | 1 | 🟨 Covered |
-| Broccoli2666 | 1 | 🟨 Covered |
-| Broccoli27 | 1 | 🟨 Covered |
-| Broccoli2872 | 1 | 🟨 Covered |
-| Broccoli2877 | 1 | 🟨 Covered |
-| Broccoli314 | 1 | 🟨 Covered |
-| Broccoli3185 | 1 | 🟨 Covered |
-| Broccoli335 | 1 | 🟨 Covered |
-| Cabbage | 1 | 🟨 Covered |
-| Carrot1064 | 1 | 🟨 Covered |
-| Carrot1074 | 1 | 🟨 Covered |
-| Carrot1090 | 1 | 🟨 Covered |
-| Carrot1124 | 1 | 🟨 Covered |
-| Carrot1194 | 1 | 🟨 Covered |
-| Carrot12 | 1 | 🟨 Covered |
-| Carrot1232 | 1 | 🟨 Covered |
-| Carrot138 | 1 | 🟨 Covered |
-| Carrot17 | 1 | 🟨 Covered |
-| Carrot1775 | 1 | 🟨 Covered |
-| Carrot205 | 1 | 🟨 Covered |
-| Carrot219 | 1 | 🟨 Covered |
-| Carrot2357 | 1 | 🟨 Covered |
-| Carrot2786 | 1 | 🟨 Covered |
-| Carrot2834 | 1 | 🟨 Covered |
-| Carrot3327 | 1 | 🟨 Covered |
-| Carrot3338 | 1 | 🟨 Covered |
-| Carrot3342 | 1 | 🟨 Covered |
-| Carrot338 | 1 | 🟨 Covered |
-| Carrot3417 | 1 | 🟨 Covered |
-| Carrot3521 | 1 | 🟨 Covered |
-| Carrot3856 | 1 | 🟨 Covered |
-| Carrot3867 | 1 | 🟨 Covered |
-| Carrot3958 | 1 | 🟨 Covered |
-| Carrot40 | 1 | 🟨 Covered |
-| Carrot41 | 1 | 🟨 Covered |
-| Chilli Medium | 1 | 🟨 Covered |
-| Corn1036 | 1 | 🟨 Covered |
-| Corn1073 | 1 | 🟨 Covered |
-| Corn1473 | 1 | 🟨 Covered |
-| Corn1538 | 1 | 🟨 Covered |
-| Corn154 | 1 | 🟨 Covered |
-| Corn1975 | 1 | 🟨 Covered |
-| Corn2280 | 1 | 🟨 Covered |
-| Corn2667 | 1 | 🟨 Covered |
-| Corn2728 | 1 | 🟨 Covered |
-| Corn2756 | 1 | 🟨 Covered |
-| Corn301 | 1 | 🟨 Covered |
-| Corn320 | 1 | 🟨 Covered |
-| Corn3274 | 1 | 🟨 Covered |
-| Corn3355 | 1 | 🟨 Covered |
-| Corn362 | 1 | 🟨 Covered |
-| Corn3805 | 1 | 🟨 Covered |
-| Corn383 | 1 | 🟨 Covered |
-| Corn4254 | 1 | 🟨 Covered |
-| Corn450 | 1 | 🟨 Covered |
-| Corn4689 | 1 | 🟨 Covered |
-| Corn4979 | 1 | 🟨 Covered |
-| Corn502 | 1 | 🟨 Covered |
-| Corn550 | 1 | 🟨 Covered |
-| Corn601 | 1 | 🟨 Covered |
-| Corn66 | 1 | 🟨 Covered |
-| Corn690 | 1 | 🟨 Covered |
-| Cucumber | 1 | 🟨 Covered |
-| Eggplant Trivia Card | 1 | 🟨 Covered |
-| Eggplant1815 | 1 | 🟨 Covered |
-| Eggplant1909 | 1 | 🟨 Covered |
-| Eggplant3235 | 1 | 🟨 Covered |
-| Eggplant346 | 1 | 🟨 Covered |
-| Eggplant3556 | 1 | 🟨 Covered |
-| Eggplant4013 | 1 | 🟨 Covered |
-| Eggplant4017 | 1 | 🟨 Covered |
-| Eggplant419 | 1 | 🟨 Covered |
-| Eggplant4367 | 1 | 🟨 Covered |
-| Eggplant4541 | 1 | 🟨 Covered |
-| Eggplant4626 | 1 | 🟨 Covered |
-| Eggplant467 | 1 | 🟨 Covered |
-| Eggplant541 | 1 | 🟨 Covered |
-| Okra274 | 1 | 🟨 Covered |
-| Okra433 | 1 | 🟨 Covered |
-| Okra496 | 1 | 🟨 Covered |
-| Okra5 | 1 | 🟨 Covered |
-| Okra522 | 1 | 🟨 Covered |
-| Papaya70 | 1 | 🟨 Covered |
-| Peas Unpacked | 1 | 🟨 Covered |
-| Potato1 | 1 | 🟨 Covered |
-| Potato1338 | 1 | 🟨 Covered |
-| Potato170 | 1 | 🟨 Covered |
-| Potato2025 | 1 | 🟨 Covered |
-| Potato2076 | 1 | 🟨 Covered |
-| Potato216 | 1 | 🟨 Covered |
-| Potato2928 | 1 | 🟨 Covered |
-| Potato3007 | 1 | 🟨 Covered |
-| Potato3705 | 1 | 🟨 Covered |
-| Potato4367 | 1 | 🟨 Covered |
-| Potato4635 | 1 | 🟨 Covered |
-| Potato495 | 1 | 🟨 Covered |
-| Potato586 | 1 | 🟨 Covered |
-| Potato59 | 1 | 🟨 Covered |
-| Potato60 | 1 | 🟨 Covered |
-| Potato620 | 1 | 🟨 Covered |
-| Tomato1047 | 1 | 🟨 Covered |
-| Tomato1048 | 1 | 🟨 Covered |
-| Tomato1067 | 1 | 🟨 Covered |
-| Tomato1080 | 1 | 🟨 Covered |
-| Tomato1085 | 1 | 🟨 Covered |
-| Tomato1115 | 1 | 🟨 Covered |
-| Tomato1119 | 1 | 🟨 Covered |
-| Tomato1185 | 1 | 🟨 Covered |
-| Tomato124 | 1 | 🟨 Covered |
-| Tomato1283 | 1 | 🟨 Covered |
-| Tomato1312 | 1 | 🟨 Covered |
-| Tomato1346 | 1 | 🟨 Covered |
-| Tomato1377 | 1 | 🟨 Covered |
-| Tomato142 | 1 | 🟨 Covered |
-| Tomato1430 | 1 | 🟨 Covered |
-| Tomato1479 | 1 | 🟨 Covered |
-| Tomato154 | 1 | 🟨 Covered |
-| Tomato1687 | 1 | 🟨 Covered |
-| Tomato1736 | 1 | 🟨 Covered |
-| Tomato2275 | 1 | 🟨 Covered |
-| Tomato229 | 1 | 🟨 Covered |
-| Tomato2364 | 1 | 🟨 Covered |
-| Tomato2448 | 1 | 🟨 Covered |
-| Tomato2500 | 1 | 🟨 Covered |
-| Tomato2801 | 1 | 🟨 Covered |
-| Tomato2905 | 1 | 🟨 Covered |
-
-> ⚪ **91 catalog items still need at least one image.**
-
----
-
-## 🍎 Fruits
-
-**40 detected product groups** · **54 photos** · **100.0% coverage**
-
-`████████████████████` **40/40**
-
-| Product | Photos | Status |
-|---|---:|---|
-| Grapes Red | 5 | 🟦 Rich |
-| Grapes Green | 3 | 🟦 Rich |
-| Pomegranate | 3 | 🟦 Rich |
-| Orange | 2 | 🟨 Covered |
-| Pear | 2 | 🟨 Covered |
-| Banana1078 | 1 | 🟨 Covered |
-| Banana1756 | 1 | 🟨 Covered |
-| Banana2922 | 1 | 🟨 Covered |
-| Banana307 | 1 | 🟨 Covered |
-| Banana3083 | 1 | 🟨 Covered |
-| Banana336 | 1 | 🟨 Covered |
-| Banana3426 | 1 | 🟨 Covered |
-| Banana3716 | 1 | 🟨 Covered |
-| Banana38 | 1 | 🟨 Covered |
-| Kiwi | 1 | 🟨 Covered |
-| Mango | 1 | 🟨 Covered |
-| Orange1379 | 1 | 🟨 Covered |
-| Orange2143 | 1 | 🟨 Covered |
-| Orange2425 | 1 | 🟨 Covered |
-| Orange337 | 1 | 🟨 Covered |
-| Orange3918 | 1 | 🟨 Covered |
-| Pineappe | 1 | 🟨 Covered |
-| Pineapple214 | 1 | 🟨 Covered |
-| Pineapple2531 | 1 | 🟨 Covered |
-| Pineapple2558 | 1 | 🟨 Covered |
-| Pineapple3 | 1 | 🟨 Covered |
-| Pineapple380 | 1 | 🟨 Covered |
-| Pineapple3884 | 1 | 🟨 Covered |
-| Pineapple3990 | 1 | 🟨 Covered |
-| Pineapple4077 | 1 | 🟨 Covered |
-| Pineapple4197 | 1 | 🟨 Covered |
-| Pineapple4274 | 1 | 🟨 Covered |
-| Poegranate | 1 | 🟨 Covered |
-| Pomegranate Bowl | 1 | 🟨 Covered |
-| Strawberry469 | 1 | 🟨 Covered |
-| Tamarind2 | 1 | 🟨 Covered |
-| Tamarind27 | 1 | 🟨 Covered |
-| Tamarind28 | 1 | 🟨 Covered |
-| Wood Apple | 1 | 🟨 Covered |
-| Wood Apple2 | 1 | 🟨 Covered |
-
----
-
-## 🌾 Grains
-
-**3 detected product groups** · **8 photos** · **100.0% coverage**
-
-`████████████████████` **3/3**
-
-| Product | Photos | Status |
-|---|---:|---|
-| Soy Beans | 6 | 🟦 Rich |
-| Chana Dal | 1 | 🟨 Covered |
-| Soy Bean | 1 | 🟨 Covered |
-
----
-<!-- AUTO-INVENTORY:END -->
